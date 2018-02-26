@@ -45,3 +45,26 @@ csv_file <- unzip(data_dir(outfile), exdir = data_dir("."))
 
 har_data <- fread(csv_file)
 saveRDS(har_data, file = data_dir("har_data.Rds"))
+
+## Adult Census Data
+
+outfile <- "adult.data"
+url <- "https://archive.ics.uci.edu/ml/machine-learning-databases/adult/"
+download.file(url = paste0(url, outfile), destfile = data_dir(outfile))
+census_adult_data <- fread(data_dir(outfile))
+
+# Get the attribute names
+con <- url("https://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.names")
+html_names <- readLines(con)
+close(con)
+names(census_adult_data) <- html_names %>%
+  # Select the rows with variable descriptions
+  extract(97:110) %>%
+  # Match everything before the ":" on each row
+  str_match("^([^:]+):") %>% extract(, 2) %>%
+  # Add a target variable name
+  c("target")
+
+census_adult_data %>%
+  as.data.frame() %>%
+saveRDS(file = data_dir("census_adult_data.Rds"))
